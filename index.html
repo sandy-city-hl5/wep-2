@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر ساندي ستي</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e9ecef;
+            text-align: center;
+        }
+        header {
+            background: #17a2b8;
+            color: #fff;
+            padding: 15px 0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .product {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            margin: 10px;
+            padding: 15px;
+            background: #ffffff;
+            display: inline-block;
+            width: 280px;
+            vertical-align: top;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px 0;
+            background: #17a2b8;
+            color: #fff;
+            border-radius: 8px;
+        }
+        .modal, .purchase-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal-content, .purchase-modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            border-radius: 8px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+    </style>
+    <script>
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+
+        function showModal() {
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('purchase-modal').style.display = 'none';
+        }
+
+        function addProduct() {
+            const productName = document.getElementById('product-name').value;
+            const productDescription = document.getElementById('product-description').value;
+            const productPrice = document.getElementById('product-price').value;
+
+            if (productName && productDescription && productPrice) {
+                const newProduct = { name: productName, description: productDescription, price: productPrice };
+                products.push(newProduct);
+                localStorage.setItem('products', JSON.stringify(products));
+                displayProducts();
+                closeModal();
+                document.getElementById('product-name').value = '';
+                document.getElementById('product-description').value = '';
+                document.getElementById('product-price').value = '';
+            } else {
+                alert("يرجى ملء جميع الحقول.");
+            }
+        }
+
+        function displayProducts() {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+            products.forEach((product, index) => {
+                productList.innerHTML += `
+                    <div class="product">
+                        <h3>${product.name}</h3>
+                        <p>${product.description}</p>
+                        <p>السعر: ${product.price} كريديت</p>
+                        <button onclick="showPurchaseModal('${product.name}')">شراء</button>
+                        <button onclick="removeProduct(${index})">مسح المنتج</button>
+                    </div>
+                `;
+            });
+        }
+
+        function showPurchaseModal(productName) {
+            document.getElementById('purchase-modal').style.display = 'block';
+            document.getElementById('current-product').textContent = productName;
+        }
+
+        function sendConfirmation() {
+            closeModal();
+            alert("تم إرسال الصورة. يرجى أخذ لقطة شاشة وفتح تذكرة في السيرفر وإبلاغهم أنك اشتريت شيئًا، مع إرفاق صورة التحويل.");
+        }
+
+        function removeProduct(index) {
+            products.splice(index, 1);
+            localStorage.setItem('products', JSON.stringify(products));
+            displayProducts();
+        }
+
+        window.onload = displayProducts;
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>متجر ساندي ستي</h1>
+</header>
+
+<main>
+    <h2>المنتجات المتاحة</h2>
+    <div id="product-list"></div>
+    <button onclick="showModal()">إضافة منتج</button>
+</main>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeModal()" style="cursor:pointer; float:right;">&times;</span>
+        <h2>إضافة منتج جديد</h2>
+        <label for="product-name">اسم المنتج:</label>
+        <input type="text" id="product-name" required><br>
+        <label for="product-description">وصف المنتج:</label>
+        <input type="text" id="product-description" required><br>
+        <label for="product-price">السعر:</label>
+        <input type="number" id="product-price" required><br>
+        <button onclick="addProduct()">إضافة</button>
+    </div>
+</div>
+
+<div id="purchase-modal" class="purchase-modal">
+    <div class="purchase-modal-content">
+        <span onclick="closeModal()" style="cursor:pointer; float:right;">&times;</span>
+        <h2>إتمام عملية الشراء</h2>
+        <p>أدخل صورة تحويل الكريديت ولقطة شاشة ل<span id="current-product"></span>:</p>
+        <input type="file" accept="image/*">
+        <button onclick="sendConfirmation()">إرسال</button>
+    </div>
+</div>
+
+<footer>
+    <p>حقوق الطبع والنشر &copy; 2024 متجر ساندي ستي</p>
+</footer>
+
+</body>
+</html>
